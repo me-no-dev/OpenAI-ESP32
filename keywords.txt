@@ -1,0 +1,91 @@
+#######################################
+# Syntax Coloring Map For OpenAI
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+OpenAI	KEYWORD1
+OpenAI_Completion	KEYWORD1
+OpenAI_ChatCompletion	KEYWORD1
+OpenAI_Edit	KEYWORD1
+OpenAI_ImageGeneration	KEYWORD1
+OpenAI_ImageVariation	KEYWORD1
+OpenAI_ImageEdit	KEYWORD1
+OpenAI_AudioTranscription	KEYWORD1
+OpenAI_AudioTranslation	KEYWORD1
+OpenAI_Image_Size	KEYWORD1
+OpenAI_Image_Response_Format	KEYWORD1
+OpenAI_Audio_Response_Format	KEYWORD1
+OpenAI_Audio_Input_Format	KEYWORD1
+OpenAI_StringResponse	KEYWORD1
+OpenAI_ImageResponse	KEYWORD1
+OpenAI_ModerationResponse	KEYWORD1
+OpenAI_EmbeddingResponse	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+tokens	KEYWORD2
+length	KEYWORD2
+getAt	KEYWORD2
+embedding	KEYWORD2
+moderation	KEYWORD2
+completion	KEYWORD2
+chat	KEYWORD2
+edit	KEYWORD2
+imageGeneration	KEYWORD2
+imageVariation	KEYWORD2
+imageEdit	KEYWORD2
+audioTranscription	KEYWORD2
+audioTranslation	KEYWORD2
+get	KEYWORD2
+del	KEYWORD2
+post	KEYWORD2
+upload	KEYWORD2
+setModel	KEYWORD2
+setMaxTokens	KEYWORD2
+setTemperature	KEYWORD2
+setTopP	KEYWORD2
+setN	KEYWORD2
+setEcho	KEYWORD2
+setStop	KEYWORD2
+setPresencePenalty	KEYWORD2
+setFrequencyPenalty	KEYWORD2
+setBestOf	KEYWORD2
+setUser	KEYWORD2
+prompt	KEYWORD2
+setSystem	KEYWORD2
+clearConversation	KEYWORD2
+message	KEYWORD2
+process	KEYWORD2
+setSize	KEYWORD2
+setResponseFormat	KEYWORD2
+image	KEYWORD2
+setPrompt	KEYWORD2
+setLanguage	KEYWORD2
+file	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+OPENAI_IMAGE_SIZE_1024x1024	LITERAL1
+OPENAI_IMAGE_SIZE_512x512	LITERAL1
+OPENAI_IMAGE_SIZE_256x256	LITERAL1
+OPENAI_IMAGE_RESPONSE_FORMAT_URL	LITERAL1
+OPENAI_IMAGE_RESPONSE_FORMAT_B64_JSON	LITERAL1
+OPENAI_AUDIO_RESPONSE_FORMAT_JSON	LITERAL1
+OPENAI_AUDIO_RESPONSE_FORMAT_TEXT	LITERAL1
+OPENAI_AUDIO_RESPONSE_FORMAT_SRT	LITERAL1
+OPENAI_AUDIO_RESPONSE_FORMAT_VERBOSE_JSON	LITERAL1
+OPENAI_AUDIO_RESPONSE_FORMAT_VTT	LITERAL1
+OPENAI_AUDIO_INPUT_FORMAT_MP3	LITERAL1
+OPENAI_AUDIO_INPUT_FORMAT_MP4	LITERAL1
+OPENAI_AUDIO_INPUT_FORMAT_MPEG	LITERAL1
+OPENAI_AUDIO_INPUT_FORMAT_MPGA	LITERAL1
+OPENAI_AUDIO_INPUT_FORMAT_M4A	LITERAL1
+OPENAI_AUDIO_INPUT_FORMAT_WAV	LITERAL1
+OPENAI_AUDIO_INPUT_FORMAT_WEBM	LITERAL1
