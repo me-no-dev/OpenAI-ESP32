@@ -1,10 +1,8 @@
 /*
   ToDo:
     - Support FS::File as input
-    - Write examples
     - Look into supporting "stream" responses?
     - Thread-Safe API?
-    - Save last error?
 */
 
 #include "OpenAI.h"
@@ -65,14 +63,29 @@ static String getJsonError(cJSON * json){
 // OpenAI_EmbeddingResponse
 //
 
-OpenAI_EmbeddingResponse::OpenAI_EmbeddingResponse(cJSON * json){
+OpenAI_EmbeddingResponse::OpenAI_EmbeddingResponse(const char * payload){
   usage = 0;
   len = 0;
   data = NULL;
+  error_str = NULL;
   cJSON * u, *tokens, *d;
   int dl;
 
-  if(json == NULL || !cJSON_IsObject(json)){
+  if(payload == NULL){
+    return;
+  }
+
+  // Parse payload
+  cJSON * json = cJSON_Parse(payload);
+
+  // Check for error
+  String error = getJsonError(json);
+  if(error.length()){
+    error_str = strdup(error.c_str());
+    if(json != NULL){
+      cJSON_Delete(json);
+    }
+    log_e("%s",error.c_str());
     return;
   }
 
@@ -156,19 +169,37 @@ OpenAI_EmbeddingResponse::~OpenAI_EmbeddingResponse(){
     }
     free(data);
   }
+  if(error_str != NULL){
+    free(error_str);
+  }
 }
 
 //
 // OpenAI_ModerationResponse
 //
 
-OpenAI_ModerationResponse::OpenAI_ModerationResponse(cJSON * json){
+OpenAI_ModerationResponse::OpenAI_ModerationResponse(const char * payload){
   len = 0;
   data = NULL;
+  error_str = NULL;
   cJSON *d;
   int dl;
 
-  if(json == NULL || !cJSON_IsObject(json)){
+  if(payload == NULL){
+    return;
+  }
+
+  // Parse payload
+  cJSON * json = cJSON_Parse(payload);
+
+  // Check for error
+  String error = getJsonError(json);
+  if(error.length()){
+    error_str = strdup(error.c_str());
+    if(json != NULL){
+      cJSON_Delete(json);
+    }
+    log_e("%s",error.c_str());
     return;
   }
 
@@ -214,19 +245,37 @@ OpenAI_ModerationResponse::~OpenAI_ModerationResponse(){
   if(data){
     free(data);
   }
+  if(error_str != NULL){
+    free(error_str);
+  }
 }
 
 //
 // OpenAI_ImageResponse
 //
 
-OpenAI_ImageResponse::OpenAI_ImageResponse(cJSON * json){
+OpenAI_ImageResponse::OpenAI_ImageResponse(const char * payload){
   len = 0;
   data = NULL;
+  error_str = NULL;
   cJSON *d;
   int dl;
 
-  if(json == NULL || !cJSON_IsObject(json)){
+  if(payload == NULL){
+    return;
+  }
+
+  // Parse payload
+  cJSON * json = cJSON_Parse(payload);
+
+  // Check for error
+  String error = getJsonError(json);
+  if(error.length()){
+    error_str = strdup(error.c_str());
+    if(json != NULL){
+      cJSON_Delete(json);
+    }
+    log_e("%s",error.c_str());
     return;
   }
 
@@ -294,20 +343,38 @@ OpenAI_ImageResponse::~OpenAI_ImageResponse(){
     }
     free(data);
   }
+  if(error_str != NULL){
+    free(error_str);
+  }
 }
 
 //
 // OpenAI_StringResponse
 //
 
-OpenAI_StringResponse::OpenAI_StringResponse(cJSON * json){
+OpenAI_StringResponse::OpenAI_StringResponse(const char * payload){
   usage = 0;
   len = 0;
   data = NULL;
+  error_str = NULL;
   cJSON * u, *tokens, *d;
   int dl;
 
-  if(json == NULL || !cJSON_IsObject(json)){
+  if(payload == NULL){
+    return;
+  }
+
+  // Parse payload
+  cJSON * json = cJSON_Parse(payload);
+
+  // Check for error
+  String error = getJsonError(json);
+  if(error.length()){
+    error_str = strdup(error.c_str());
+    if(json != NULL){
+      cJSON_Delete(json);
+    }
+    log_e("%s",error.c_str());
     return;
   }
 
@@ -391,11 +458,14 @@ end:
 }
 
 OpenAI_StringResponse::~OpenAI_StringResponse(){
-  if(data){
+  if(data != NULL){
     for (unsigned int i = 0; i < len; i++){
       free(data[i]);
     }
     free(data);
+  }
+  if(error_str != NULL){
+    free(error_str);
   }
 }
 
@@ -547,15 +617,7 @@ OpenAI_EmbeddingResponse OpenAI::embedding(String input, const char * model, con
     log_e("Empty response!");
     return result;
   }
-  cJSON * json = cJSON_Parse(response.c_str());
-  String error = getJsonError(json);
-  if(error.length()){
-    log_e("%s",error.c_str());
-  } else {
-    return OpenAI_EmbeddingResponse(json);
-  }
-  cJSON_Delete(json);
-  return result;
+  return OpenAI_EmbeddingResponse(response.c_str());
 }
 
 // moderations { //Classifies if text violates OpenAI's Content Policy
@@ -595,15 +657,7 @@ OpenAI_ModerationResponse OpenAI::moderation(String input, const char * model){
     log_e("Empty result!");
     return result;
   }
-  cJSON * json = cJSON_Parse(res.c_str());
-  String error = getJsonError(json);
-  if(error.length()){
-    log_e("%s",error.c_str());
-  } else {
-    return OpenAI_ModerationResponse(json);
-  }
-  cJSON_Delete(json);
-  return result;
+  return OpenAI_ModerationResponse(res.c_str());
 }
 
 // completions { //Creates a completion for the provided prompt and parameters
@@ -788,15 +842,7 @@ OpenAI_StringResponse OpenAI_Completion::prompt(String p){
     log_e("Empty result!");
     return result;
   }
-  cJSON * json = cJSON_Parse(res.c_str());
-  String error = getJsonError(json);
-  if(error.length()){
-    log_e("%s",error.c_str());
-  } else {
-    return OpenAI_StringResponse(json);
-  }
-  cJSON_Delete(json);
-  return result;
+  return OpenAI_StringResponse(res.c_str());
 }
 
 // chat/completions { //Given a chat conversation, the model will return a chat completion response.
@@ -1024,28 +1070,20 @@ OpenAI_StringResponse OpenAI_ChatCompletion::message(String p, bool save){
     log_e("Empty result!");
     return result;
   }
-  cJSON * json = cJSON_Parse(res.c_str());
-  String error = getJsonError(json);
-  if(error.length()){
-    log_e("%s",error.c_str());
-  } else {
-    if(save){
-      //add the responses to the messages here
-      //double parsing is here as workaround
-      OpenAI_StringResponse r = OpenAI_StringResponse(cJSON_Parse(res.c_str()));
-      if(r.length()){
-        if(createChatMessage(messages, "user", p.c_str()) == NULL){
-          log_e("createChatMessage failed!");
-        }
-        if(createChatMessage(messages, "assistant", r.getAt(0)) == NULL){
-          log_e("createChatMessage failed!");
-        }
+  if(save){
+    //add the responses to the messages here
+    //double parsing is here as workaround
+    OpenAI_StringResponse r = OpenAI_StringResponse(res.c_str());
+    if(r.length()){
+      if(createChatMessage(messages, "user", p.c_str()) == NULL){
+        log_e("createChatMessage failed!");
+      }
+      if(createChatMessage(messages, "assistant", r.getAt(0)) == NULL){
+        log_e("createChatMessage failed!");
       }
     }
-    return OpenAI_StringResponse(json);
   }
-  cJSON_Delete(json);
-  return result;
+  return OpenAI_StringResponse(res.c_str());
 }
 
 // edits { //Creates a new edit for the provided input, instruction, and parameters.
@@ -1132,15 +1170,7 @@ OpenAI_StringResponse OpenAI_Edit::process(String instruction, String input){
     log_e("Empty result!");
     return result;
   }
-  cJSON * json = cJSON_Parse(res.c_str());
-  String error = getJsonError(json);
-  if(error.length()){
-    log_e("%s",error.c_str());
-  } else {
-    return OpenAI_StringResponse(json);
-  }
-  cJSON_Delete(json);
-  return result;
+  return OpenAI_StringResponse(res.c_str());
 }
 
 //
@@ -1230,15 +1260,7 @@ OpenAI_ImageResponse OpenAI_ImageGeneration::prompt(String p){
     log_e("Empty result!");
     return result;
   }
-  cJSON * json = cJSON_Parse(res.c_str());
-  String error = getJsonError(json);
-  if(error.length()){
-    log_e("%s",error.c_str());
-  } else {
-    return OpenAI_ImageResponse(json);
-  }
-  cJSON_Delete(json);
-  return result;
+  return OpenAI_ImageResponse(res.c_str());
 }
 
 // images/variations { //Creates a variation of a given image.
@@ -1339,15 +1361,7 @@ OpenAI_ImageResponse OpenAI_ImageVariation::image(uint8_t * img_data, size_t img
     log_e("Empty result!");
     return result;
   }
-  cJSON * json = cJSON_Parse(res.c_str());
-  String error = getJsonError(json);
-  if(error.length()){
-    log_e("%s",error.c_str());
-  } else {
-    return OpenAI_ImageResponse(json);
-  }
-  cJSON_Delete(json);
-  return result;
+  return OpenAI_ImageResponse(res.c_str());
 }
 
 // images/edits { //Creates an edited or extended image given an original image and a prompt.
@@ -1480,15 +1494,7 @@ OpenAI_ImageResponse OpenAI_ImageEdit::image(uint8_t * img_data, size_t img_len,
     log_e("Empty result!");
     return result;
   }
-  cJSON * json = cJSON_Parse(res.c_str());
-  String error = getJsonError(json);
-  if(error.length()){
-    log_e("%s",error.c_str());
-  } else {
-    return OpenAI_ImageResponse(json);
-  }
-  cJSON_Delete(json);
-  return result;
+  return OpenAI_ImageResponse(res.c_str());
 }
 
 // audio/transcriptions { //Transcribes audio into the input language.

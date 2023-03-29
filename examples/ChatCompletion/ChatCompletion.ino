@@ -58,7 +58,10 @@ void loop() {
       response.trim();
       Serial.printf("Message[%u]:\n%s\n", i, response.c_str());
     }
+  } else if(result.error()){
+    Serial.print("Error! ");
+    Serial.println(result.error());
   } else {
-    Serial.println("Error receiving message!");
+    Serial.println("Unknown error!");
   }
 }

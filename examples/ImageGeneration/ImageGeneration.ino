@@ -46,7 +46,10 @@ void loop() {
       response.trim();
       Serial.printf("Image[%u]:\n%s\n", i, result.getAt(i));
     }
+  } else if(result.error()){
+    Serial.print("Error! ");
+    Serial.println(result.error());
   } else {
-    Serial.println("Error receiving image!");
+    Serial.println("Unknown error!");
   }
 }

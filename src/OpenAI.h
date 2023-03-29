@@ -50,9 +50,10 @@ class OpenAI_EmbeddingResponse {
     unsigned int usage;
     unsigned int len;
     OpenAI_EmbeddingData * data;
+    char * error_str;
 
   public:
-    OpenAI_EmbeddingResponse(cJSON * response);
+    OpenAI_EmbeddingResponse(const char * payload);
     ~OpenAI_EmbeddingResponse();
 
     unsigned int tokens(){
@@ -67,15 +68,19 @@ class OpenAI_EmbeddingResponse {
       }
       return NULL;
     }
+    const char * error(){
+      return error_str;
+    }
 };
 
 class OpenAI_ModerationResponse {
   private:
     unsigned int len;
     bool * data;
+    char * error_str;
 
   public:
-    OpenAI_ModerationResponse(cJSON * response);
+    OpenAI_ModerationResponse(const char * payload);
     ~OpenAI_ModerationResponse();
 
     unsigned int length(){
@@ -87,15 +92,19 @@ class OpenAI_ModerationResponse {
       }
       return false;
     }
+    const char * error(){
+      return error_str;
+    }
 };
 
 class OpenAI_ImageResponse {
   private:
     unsigned int len;
     char ** data;
+    char * error_str;
 
   public:
-    OpenAI_ImageResponse(cJSON * response);
+    OpenAI_ImageResponse(const char * payload);
     ~OpenAI_ImageResponse();
 
     unsigned int length(){
@@ -107,6 +116,9 @@ class OpenAI_ImageResponse {
       }
       return "";
     }
+    const char * error(){
+      return error_str;
+    }
 };
 
 class OpenAI_StringResponse {
@@ -114,9 +126,10 @@ class OpenAI_StringResponse {
     unsigned int usage;
     unsigned int len;
     char ** data;
+    char * error_str;
 
   public:
-    OpenAI_StringResponse(cJSON * response);
+    OpenAI_StringResponse(const char * payload);
     ~OpenAI_StringResponse();
 
     unsigned int tokens(){
@@ -130,6 +143,9 @@ class OpenAI_StringResponse {
         return data[index];
       }
       return "";
+    }
+    const char * error(){
+      return error_str;
     }
 };
 

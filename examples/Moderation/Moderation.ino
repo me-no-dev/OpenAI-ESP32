@@ -36,8 +36,11 @@ void loop() {
     for (unsigned int i = 0; i < result.length(); ++i){
       Serial.printf("Moderation[%u]:\n%s\n", i, result.getAt(i)?"Flagged":"Not Flagged");
     }
+  } else if(result.error()){
+    Serial.print("Error! ");
+    Serial.println(result.error());
   } else {
-    Serial.println("Error receiving moderation!");
+    Serial.println("Unknown error!");
   }
   Serial.println();
 }
