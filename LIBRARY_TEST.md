@@ -1,1 +1,1 @@
-Empty file for test results
+Empty file for test results.
