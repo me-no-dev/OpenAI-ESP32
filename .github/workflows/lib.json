@@ -3,7 +3,7 @@
         "source-path": "./",
         "exclude_targets": [],
         "sketch_path": [
-            "- examples"
+            "examples"
         ]
     }
 ]
