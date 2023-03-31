@@ -20,7 +20,7 @@ env:
 jobs:
   compile-sketch:
     if: |
-      (github.event_name == 'pull_request' ||
+      github.event_name == 'pull_request' ||
       (github.event_name == 'push' && github.repository == 'me-no-dev/OpenAI-ESP32')
     runs-on: ubuntu-latest
 
