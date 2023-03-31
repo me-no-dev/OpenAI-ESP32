@@ -41,16 +41,16 @@ void loop() {
   Serial.println();
   Serial.println(line);
   Serial.println("Processing...");
-  OpenAI_StringResponse comp = completion.prompt(line);
-  if(comp.length() == 1){
-    Serial.printf("Received completion. Tokens: %u\n", comp.tokens());
-    String response = comp.getAt(0);
+  OpenAI_StringResponse result = completion.prompt(line);
+  if(result.length() == 1){
+    Serial.printf("Received completion. Tokens: %u\n", result.tokens());
+    String response = result.getAt(0);
     response.trim();
     Serial.println(response);
-  } else if(comp.length() > 1){
-    Serial.printf("Received %u completions. Tokens: %u\n", comp.length(), comp.tokens());
-    for (unsigned int i = 0; i < comp.length(); ++i){
-      String response = comp.getAt(i);
+  } else if(result.length() > 1){
+    Serial.printf("Received %u completions. Tokens: %u\n", result.length(), result.tokens());
+    for (unsigned int i = 0; i < result.length(); ++i){
+      String response = result.getAt(i);
       response.trim();
       Serial.printf("Completion[%u]:\n%s\n", i, response.c_str());
     }
