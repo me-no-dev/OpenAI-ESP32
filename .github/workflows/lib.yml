@@ -1,11 +1,14 @@
 name: Library Compilation Test
 
-# The workflow will run on schedule and labeled pull requests
+# The workflow will run on push to master branch (create result file) and on pull requests (adding results comment)
 on:
   # Run when new changes are pushed to master branch
-   push:
+  push:
     branches:
       - 'master'
+  
+  pull_request:
+    types: [opened, reopened, synchronize, labeled]
 
 env:
   # It's convenient to set variables for values used multiple times in the workflow
@@ -78,9 +81,26 @@ jobs:
           name: ${{ env.SKETCHES_REPORTS_ARTIFACT_NAME }}
           path: ${{ env.SKETCHES_REPORTS_PATH }}
 
+  report-comment:
+    needs: compile-sketch  # Wait for the compile job to finish to get the data for the report
+    if: github.event_name == 'pull_request' # Only run the job when the workflow is triggered by a pull request
+    runs-on: ubuntu-latest
+    steps:
+      # This step is needed to get the size data produced by the compile jobs
+      - name: Download sketches reports artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.SKETCHES_REPORTS_ARTIFACT_NAME }}
+          path: ${{ env.SKETCHES_REPORTS_PATH }}
+
+      - name: Report results
+        uses: P-R-O-C-H-Y/report-size-deltas@main
+        with:
+          sketches-reports-source: ${{ env.SKETCHES_REPORTS_PATH }}
+
   report-to-file:
     needs: compile-sketch  # Wait for the compile job to finish to get the data for the report
-    if: github.event_name == 'push' # Only run the job when the workflow is triggered by a schedule
+    if: github.event_name == 'push' # Only run the job when the workflow is triggered by a push
     runs-on: ubuntu-latest
     steps:
       # Check out repository
