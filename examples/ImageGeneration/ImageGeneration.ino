@@ -42,8 +42,6 @@ void loop() {
   } else if(result.length() > 1){
     Serial.printf("Received %u images.\n", result.length());
     for (unsigned int i = 0; i < result.length(); ++i){
-      String response = result.getAt(i);
-      response.trim();
       Serial.printf("Image[%u]:\n%s\n", i, result.getAt(i));
     }
   } else if(result.error()){
