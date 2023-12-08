@@ -1,6 +1,7 @@
 #pragma once
 #include "Arduino.h"
 #include "cJSON.h"
+#include <base64.h>
 
 class OpenAI_Completion;
 class OpenAI_ChatCompletion;
@@ -226,6 +227,7 @@ class OpenAI_ChatCompletion {
     float presence_penalty;
     float frequency_penalty;
     const char * user;
+    const uint8_t * image;
 
   protected:
 
@@ -245,6 +247,7 @@ class OpenAI_ChatCompletion {
     OpenAI_ChatCompletion & clearConversation();          //clears the accumulated conversation
 
     OpenAI_StringResponse message(String m, bool save=true);//Send the message for completion. Save it with the first response if selected
+    OpenAI_StringResponse message(String m, const uint8_t * imageData, long unsigned int imageLength ,bool save=true);//Send the message with an image for completion. Save it with the first response if selected
 };
 
 class OpenAI_Edit {

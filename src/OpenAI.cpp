@@ -993,7 +993,171 @@ static cJSON * createChatMessage(cJSON * messages, const char * role, const char
   return message;
 }
 
-OpenAI_StringResponse OpenAI_ChatCompletion::message(String p, bool save){
+
+/*
+text with Image stucture:
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "content"
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/jpeg;base64,{image}"
+          }
+        }
+      ]
+    }
+*/
+
+static cJSON * createChatMessageWithImageInput (cJSON * messages, const char * role, const char * content, const uint8_t * imageData, long unsigned int imageLength){
+  cJSON * message = cJSON_CreateObject();
+  if(message == NULL){
+    log_e("cJSON_CreateObject failed!");
+    return NULL;
+  }
+  if(cJSON_AddStringToObject(message, "role", role) == NULL){
+    cJSON_Delete(message);
+    log_e("cJSON_AddStringToObject failed!");
+    return NULL;
+  }
+  //add a array 
+  cJSON * contentArray = cJSON_CreateArray();
+
+  if(contentArray == NULL){
+    cJSON_Delete(message);
+    log_e("cJSON_CreateArray failed!");
+    return NULL;
+  }
+
+  // make an object for the text
+  cJSON * contentObjectText = cJSON_CreateObject();
+  if(contentObjectText == NULL){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    log_e("cJSON_CreateObject failed!");
+    return NULL;
+  }
+  // add the type text
+  if(cJSON_AddStringToObject(contentObjectText, "type", "text") == NULL){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectText);
+    log_e("cJSON_AddStringToObject failed!");
+    return NULL;
+  }
+  // add the text to the object
+  if(cJSON_AddStringToObject(contentObjectText, "text", content) == NULL){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectText);
+    log_e("cJSON_AddStringToObject failed!");
+    return NULL;
+  }
+  // add the object to the array
+  if(!cJSON_AddItemToArray(contentArray, contentObjectText)){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectText);
+    log_e("cJSON_AddItemToArray failed!");
+    return NULL;
+  }
+
+  // make an object for the image
+  cJSON * contentObjectImage = cJSON_CreateObject();
+  if(contentObjectImage == NULL){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    log_e("cJSON_CreateObject failed!");
+    return NULL;
+  }
+  // add the type image
+  if(cJSON_AddStringToObject(contentObjectImage, "type", "image") == NULL){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectImage);
+    log_e("cJSON_AddStringToObject failed!");
+    return NULL;
+  }
+  // make an object for the image url
+  cJSON * contentObjectImageURL = cJSON_CreateObject();
+  if(contentObjectImageURL == NULL){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectImage);
+    log_e("cJSON_CreateObject failed!");
+    return NULL;
+  }
+  // base 64 encode the image
+  String base64Image = base64::encode(imageData, imageLength);
+
+
+  if(base64Image == NULL){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectImage);
+    cJSON_Delete(contentObjectImageURL);
+    log_e("base64Encode failed!");
+    return NULL;
+  }
+  // add the url to the object
+  if(cJSON_AddStringToObject(contentObjectImageURL, "url", ("data:image/jpeg;base64,"+ base64Image).c_str()) == NULL){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectImage);
+    cJSON_Delete(contentObjectImageURL);
+    log_e("cJSON_AddStringToObject failed!");
+    return NULL;
+  }
+  // add the object to the image object
+  if(!cJSON_AddItemToObject(contentObjectImage, "image_url", contentObjectImageURL)){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectImage);
+    cJSON_Delete(contentObjectImageURL);
+    log_e("cJSON_AddItemToObject failed!");
+    return NULL;
+  }
+  // add the image object to the array
+  if(!cJSON_AddItemToArray(contentArray, contentObjectImage)){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectImage);
+    cJSON_Delete(contentObjectImageURL);
+    log_e("cJSON_AddItemToArray failed!");
+    return NULL;
+  }
+
+  // add the array to the message
+  if(!cJSON_AddItemToObject(message, "content", contentArray)){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectImage);
+    cJSON_Delete(contentObjectImageURL);
+    log_e("cJSON_AddItemToObject failed!");
+    return NULL;
+  }
+
+  // add the message to the messages
+  if(!cJSON_AddItemToArray(messages, message)){
+    cJSON_Delete(message);
+    cJSON_Delete(contentArray);
+    cJSON_Delete(contentObjectImage);
+    cJSON_Delete(contentObjectImageURL);
+    log_e("cJSON_AddItemToArray failed!");
+    return NULL;
+  }
+  return message;
+}
+
+OpenAI_StringResponse OpenAI_ChatCompletion::message(String p,bool save){
+  message(p, NULL, 0, save);
+}
+
+OpenAI_StringResponse OpenAI_ChatCompletion::message(String p,const uint8_t * imageData, long unsigned int imageLength, bool save){
   String endpoint = "chat/completions";
 
   OpenAI_StringResponse result = OpenAI_StringResponse(NULL);
@@ -1032,13 +1196,21 @@ OpenAI_StringResponse OpenAI_ChatCompletion::message(String p, bool save){
       }
     }
   }
-  if(createChatMessage(_messages, "user", p.c_str()) == NULL){
-    cJSON_Delete(req);
-    cJSON_Delete(_messages);
-    log_e("createChatMessage failed!");
-    return result;
+  if(model != "gpt-4-vision-preview" || imageData == NULL){
+    if(createChatMessage(_messages, "user", p.c_str()) == NULL){
+      cJSON_Delete(req);
+      cJSON_Delete(_messages);
+      log_e("createChatMessage failed!");
+      return result;
+    }
+  } else {
+    if(createChatMessageWithImageInput(_messages, "user", p.c_str(), imageData, imageLength) == NULL){
+      cJSON_Delete(req);
+      cJSON_Delete(_messages);
+      log_e("createChatMessageWithImageInput failed!");
+      return result;
+    }
   }
-
   reqAddItem("messages", _messages);
   if(max_tokens){
     reqAddNumber("max_tokens", max_tokens);
