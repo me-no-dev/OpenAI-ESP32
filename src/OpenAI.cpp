@@ -508,7 +508,6 @@ String OpenAI::post(String endpoint, String jsonBody) {
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Authorization", "Bearer " + api_key);
   int httpCode = http.POST(jsonBody);
-  //print the remaining memory
   if (httpCode != HTTP_CODE_OK) {
     log_e("HTTP_ERROR: %d", httpCode);
   }
@@ -526,8 +525,6 @@ String OpenAI::post(String endpoint, uint8_t *jsonData, size_t jsonSize) {
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Authorization", "Bearer " + api_key);
   int httpCode = http.sendRequest("POST", jsonData, jsonSize);
-  
-
   if (httpCode != HTTP_CODE_OK) {
     log_e("HTTP_ERROR: %d", httpCode);
   }
