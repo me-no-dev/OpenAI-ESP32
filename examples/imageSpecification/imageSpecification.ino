@@ -1,5 +1,11 @@
+/*
+  This example shows how to use the OpenAI API with the ESP32-CAM.
+  It takes a picture with the camera and sends it to the OpenAI API.
+  The API will then return a description of the image.
+*/
+
 #include <WiFi.h>
-#include "lib/OpenAI-ESP32CAM-Vision-Analisis/src/OpenAI.h"
+#include <OpenAI.h>
 #include "camera.h"
 
 
