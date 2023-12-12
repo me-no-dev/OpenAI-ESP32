@@ -175,6 +175,7 @@ class OpenAI {
     String get(String endpoint);
     String del(String endpoint);
     String post(String endpoint, String jsonBody);
+    String post(String endpoint, uint8_t *jsonData, size_t jsonSize);
     String upload(String endpoint, String boundary, uint8_t * data, size_t len);
 };
 

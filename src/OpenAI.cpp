@@ -503,14 +503,35 @@ String OpenAI::upload(String endpoint, String boundary, uint8_t * data, size_t l
 String OpenAI::post(String endpoint, String jsonBody) {
   log_d("\"%s\": %s", endpoint.c_str(), jsonBody.c_str());
   HTTPClient http;
-  http.setTimeout(60000);
+  http.setTimeout(500000);
   http.begin("https://api.openai.com/v1/" + endpoint);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Authorization", "Bearer " + api_key);
   int httpCode = http.POST(jsonBody);
+  //print the remaining memory
   if (httpCode != HTTP_CODE_OK) {
     log_e("HTTP_ERROR: %d", httpCode);
   }
+  String response = http.getString();
+  http.end();
+  log_d("%s", response.c_str());
+  return response;
+}
+
+String OpenAI::post(String endpoint, uint8_t *jsonData, size_t jsonSize) {
+  log_d("\"%s\": JSON data size=%u", endpoint.c_str(), jsonSize);
+  HTTPClient http;
+  http.setTimeout(500000);
+  http.begin("https://api.openai.com/v1/" + endpoint);
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("Authorization", "Bearer " + api_key);
+  int httpCode = http.sendRequest("POST", jsonData, jsonSize);
+  
+
+  if (httpCode != HTTP_CODE_OK) {
+    log_e("HTTP_ERROR: %d", httpCode);
+  }
+
   String response = http.getString();
   http.end();
   log_d("%s", response.c_str());
@@ -1196,7 +1217,8 @@ OpenAI_StringResponse OpenAI_ChatCompletion::message(String p,const uint8_t * im
       }
     }
   }
-  if(model != "gpt-4-vision-preview" || imageData == NULL){
+  if(strcmp(model, "gpt-4-vision-preview") != 0 || imageData == NULL || imageLength == 0){
+    Serial.println("this should not happen");
     if(createChatMessage(_messages, "user", p.c_str()) == NULL){
       cJSON_Delete(req);
       cJSON_Delete(_messages);
@@ -1425,14 +1447,20 @@ OpenAI_ImageResponse OpenAI_ImageGeneration::prompt(String p){
   if(user != NULL){
     reqAddString("user", user);
   }
-  String jsonBody = String(cJSON_Print(req));
-  cJSON_Delete(req);
-  String res = oai.post(endpoint, jsonBody);
-  if(!res.length()){
-    log_e("Empty result!");
-    return result;
+  char *jsonBuffer = cJSON_Print(req);
+  if (jsonBuffer != NULL) {
+    size_t jsonSize = strlen(jsonBuffer);
+
+    String res = oai.post(endpoint, reinterpret_cast<uint8_t *>(jsonBuffer), jsonSize);
+    if(!res.length()){
+      log_e("Empty result!");
+      return result;
+    }
+    return OpenAI_ImageResponse(res.c_str());
+    free(jsonBuffer);
+  } else {
+    Serial.println("Error in cJSON_Print");
   }
-  return OpenAI_ImageResponse(res.c_str());
 }
 
 // images/variations { //Creates a variation of a given image.
