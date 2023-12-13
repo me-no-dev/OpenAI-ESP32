@@ -503,7 +503,7 @@ String OpenAI::upload(String endpoint, String boundary, uint8_t * data, size_t l
 String OpenAI::post(String endpoint, String jsonBody) {
   log_d("\"%s\": %s", endpoint.c_str(), jsonBody.c_str());
   HTTPClient http;
-  http.setTimeout(500000);
+  http.setTimeout(60000);
   http.begin("https://api.openai.com/v1/" + endpoint);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Authorization", "Bearer " + api_key);
@@ -520,7 +520,7 @@ String OpenAI::post(String endpoint, String jsonBody) {
 String OpenAI::post(String endpoint, uint8_t *jsonData, size_t jsonSize) {
   log_d("\"%s\": JSON data size=%u", endpoint.c_str(), jsonSize);
   HTTPClient http;
-  http.setTimeout(500000);
+  http.setTimeout(60000);
   http.begin("https://api.openai.com/v1/" + endpoint);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Authorization", "Bearer " + api_key);
